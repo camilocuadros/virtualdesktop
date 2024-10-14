@@ -1,6 +1,11 @@
 # Usamos la imagen base de Ubuntu
 FROM ubuntu:20.04
 
+# Desactivar la interacción y configurar zona horaria
+ENV DEBIAN_FRONTEND=noninteractive
+RUN ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime && dpkg-reconfigure --frontend noninteractive tzdata
+
+
 # Actualizar el sistema y paquetes necesarios
 RUN apt-get update && apt-get install -y \
     xfce4 \
