@@ -3,11 +3,15 @@ FROM ubuntu:20.04
 
 # Desactivar la interacción y configurar zona horaria
 ENV DEBIAN_FRONTEND=noninteractive
-RUN ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime && dpkg-reconfigure --frontend noninteractive tzdata
 
-
-# Actualizar el sistema y paquetes necesarios
+# Actualizar los paquetes y asegurarse de instalar tzdata antes de configurar la zona horaria
 RUN apt-get update && apt-get install -y \
+    tzdata \
+    && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
+    && dpkg-reconfigure --frontend noninteractive tzdata
+
+# Instalar XFCE y otros paquetes necesarios
+RUN apt-get install -y \
     xfce4 \
     xfce4-goodies \
     tightvncserver \
