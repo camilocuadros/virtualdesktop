@@ -20,8 +20,8 @@ jobs:
 
       # Construir la imagen
       - name: Build Docker image
-        run: docker build -t <your-dockerhub-username>/ubuntu-xfce-vnc .
+        run: docker build -t camilocuaddros2/virtualdesktop .
 
       # Push de la imagen a Docker Hub
       - name: Push Docker image
-        run: docker push <your-dockerhub-username>/ubuntu-xfce-vnc
+        run: docker push camilocuadros2/virtualdesktop
