@@ -1,5 +1,15 @@
 FROM ubuntu:20.04
 
+# Desactivar la interacción para evitar prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Actualizar el índice de paquetes, instalar tzdata y actualizar el sistema
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y \
+    tzdata \
+    && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
+    && dpkg-reconfigure --frontend noninteractive tzdata
+
 # Actualizar e instalar dependencias necesarias
 RUN apt-get update && apt-get install -y \
     xfce4 xfce4-goodies \
@@ -11,12 +21,6 @@ RUN apt-get update && apt-get install -y \
     x11-xserver-utils \
     unzip \
     && apt-get clean
-
-# Configurar la zona horaria (por ejemplo, para Colombia)
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get install -y tzdata && \
-    ln -fs /usr/share/zoneinfo/America/Bogota /etc/localtime && \
-    dpkg-reconfigure --frontend noninteractive tzdata
 
 # Crear usuario
 RUN useradd -m remoteuser && echo "remoteuser:password" | chpasswd && adduser remoteuser sudo
