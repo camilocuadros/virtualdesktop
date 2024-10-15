@@ -20,8 +20,8 @@ jobs:
 
       # Construir la imagen con el nombre correcto (Reemplaza "miusuario" por tu nombre real de Docker Hub)
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/virtualdesktop:latest .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/google-remote-desktop:latest .
 
       # Push de la imagen a Docker Hub (Asegúrate de que el nombre coincide con el de la construcción)
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/virtualdesktop:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/google-remote-desktop:latest
