@@ -1,3 +1,4 @@
+# Usamos la imagen base de Ubuntu
 FROM ubuntu:20.04
 
 # Desactivar la interacción para evitar prompts
@@ -10,35 +11,36 @@ RUN apt-get update && apt-get upgrade -y \
     && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
     && dpkg-reconfigure --frontend noninteractive tzdata
 
-# Actualizar e instalar dependencias necesarias
+# Instalar XFCE y otros paquetes necesarios
 RUN apt-get update && apt-get install -y \
-    xfce4 xfce4-goodies \
-    sudo \
-    wget \
-    curl \
-    software-properties-common \
+    xfce4 \
+    xfce4-goodies \
+    tightvncserver \
     dbus-x11 \
     x11-xserver-utils \
-    unzip \
-    && apt-get clean
+    supervisor \
+    xterm \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Crear usuario
-RUN useradd -m remoteuser && echo "remoteuser:password" | chpasswd && adduser remoteuser sudo
-RUN echo "xfce4-session" > /home/remoteuser/.xsession
+# Crear el usuario para la sesión VNC
+RUN useradd -ms /bin/bash ubuntu
 
-# Descargar e instalar Google Chrome
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    dpkg -i google-chrome-stable_current_amd64.deb || apt-get install -f -y
+# Configuración de VNC
+RUN mkdir -p /home/ubuntu/.vnc \
+    && echo "ubuntu" | vncpasswd -f > /home/ubuntu/.vnc/passwd \
+    && chown -R ubuntu:ubuntu /home/ubuntu/.vnc \
+    && chmod 600 /home/ubuntu/.vnc/passwd
 
-# Descargar e instalar Google Remote Desktop
-RUN wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb && \
-    dpkg -i chrome-remote-desktop_current_amd64.deb || apt-get install -f -y
+# Instalar scripts de inicio para el servidor VNC
+RUN echo '#!/bin/bash\nxrdb $HOME/.Xresources\nstartxfce4 &' > /home/ubuntu/.vnc/xstartup \
+    && chmod +x /home/ubuntu/.vnc/xstartup
 
-# Configurar Google Remote Desktop
-RUN usermod -a -G chrome-remote-desktop remoteuser
+# Configuración de supervisor para mantener el VNC activo
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Exponer el puerto
-EXPOSE 3389
+# Exponer el puerto VNC
+EXPOSE 5901
 
-# Iniciar sesión automática y ejecutar XFCE4 cuando se conecte con Google Remote Desktop
-CMD /opt/google/chrome-remote-desktop/start-host --code="$REMOTE_DESKTOP_ACCESS_CODE" --redirect-url="https://remotedesktop.google.com/" --name="Ubuntu-Google-Remote-Desktop"
+# Comando de inicio
+CMD ["/usr/bin/supervisord"]
